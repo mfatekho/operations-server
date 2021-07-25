@@ -5,6 +5,7 @@ import { OPERATIONS_REPO_PROVIDER } from '../shared/constants';
 import { Operation } from './entities/operation.entity';
 import { Repository } from 'typeorm';
 import { BehaviorSubject } from 'rxjs';
+import { StatusNames } from '../shared/status';
 
 @Injectable()
 export class OperationsService {
@@ -49,6 +50,11 @@ export class OperationsService {
     if (!operation) {
       return;
     }
+    const operations = this.operationsSubject$.getValue();
+    const filteredOperations = operations.filter(
+      (op) => op.id !== operation.id,
+    );
+    this.operationsSubject$.next([...filteredOperations]);
     return operation.remove();
   }
 
@@ -57,10 +63,12 @@ export class OperationsService {
     this.operationsSubject$.next([...operations, operation]);
     setTimeout(async () => {
       const operations = this.operationsSubject$.getValue();
+      const status =
+        Math.random() < 0.5 ? StatusNames.FAILED : StatusNames.READY;
       const updatedOperation = operations.map((op) =>
-        op.id === operation.id ? ({ ...op, status: 'Ready' } as Operation) : op,
+        op.id === operation.id ? ({ ...op, status } as Operation) : op,
       );
-      operation.status = 'Ready';
+      operation.status = status;
       await operation.save();
       this.operationsSubject$.next(updatedOperation);
     }, 5000);

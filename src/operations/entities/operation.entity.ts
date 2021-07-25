@@ -1,4 +1,5 @@
 import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { StatusNames } from '../../shared/status';
 
 @Entity()
 export class Operation extends BaseEntity {
@@ -8,6 +9,6 @@ export class Operation extends BaseEntity {
   @Column({ length: 500 })
   name: string;
 
-  @Column({ length: 500, nullable: false, default: 'In Progress' })
+  @Column({ length: 500, nullable: false, default: StatusNames.RUNNING })
   status: string;
 }
